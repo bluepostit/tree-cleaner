@@ -1,0 +1,3 @@
+{
+  "cleanDirs": ["node_modules", "vendor", "tmp"]
+}
