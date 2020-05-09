@@ -34,6 +34,13 @@ const rmdir = (dir) => {
   })
 }
 
+const getOptionsForRecurse = (options) => {
+  const newOptions = {}
+  Object.assign(newOptions, options)
+  newOptions.depth = options.depth - 1
+  return newOptions
+}
+
 const cleanup = async (path, options) => {
   DEBUG && console.log(`Checking ${path}/...`)
   await fs.opendir(path, async (err, dir) => {
@@ -52,9 +59,7 @@ const cleanup = async (path, options) => {
           rmdir(path)
         }
       } else if (node.isDirectory() && options.depth > 1) {
-        const recurseOptions = {}
-        Object.assign(recurseOptions, options)
-        recurseOptions.depth = options.depth - 1
+        const recurseOptions = getOptionsForRecurse(options)
         cleanup(path, recurseOptions)
       }
     }
