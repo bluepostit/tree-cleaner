@@ -7,5 +7,9 @@
   "license": "MIT",
   "dependencies": {
     "minimist": "^1.2.5"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "testdirs": "node test/mkdirs.js"
   }
 }
