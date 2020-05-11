@@ -18,7 +18,7 @@ const debugDirEntry = (dirEntry) => {
 }
 
 const shouldClean = (dirEntry) => {
-  const name = dirEntry.name;
+  const name = dirEntry.name
   return config.cleanDirs.indexOf(name) >= 0
 }
 
@@ -67,11 +67,11 @@ const cleanup = async (path, options) => {
 }
 
 const main = async () => {
-  const argv = minimist(process.argv.slice(2), {boolean: true})
-  const dir = argv['_'][0] || '.'
-  const depth = argv['d'] || 2
-  DEBUG = argv['debug'] || false
-  VERBOSE = argv['verbose'] || false
+  const argv = minimist(process.argv.slice(2), { boolean: true })
+  const dir = argv._[0] || '.'
+  const depth = argv.d || 2
+  DEBUG = argv.debug || false
+  VERBOSE = argv.verbose || false
   DRY_RUN = argv['dry-run'] || false
 
   if (DRY_RUN) {
