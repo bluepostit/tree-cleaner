@@ -3,8 +3,12 @@ class Inspector {
     this.config = config
   }
 
-  shouldRemove (dirName) {
-    return this.config.cleanDirs.indexOf(dirName) >= 0
+  shouldRemove (node) {
+    if (!node.isDirectory()) {
+      return false
+    }
+
+    return this.config.cleanDirs.indexOf(node.name) >= 0
   }
 }
 

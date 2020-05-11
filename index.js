@@ -43,7 +43,7 @@ const processDirectoryNode = async (directory, node, options) => {
   const path = `${directory.path}/${node.name}`
   const inspector = options.inspector
   let removed = 0
-  if (inspector.shouldRemove(node.name)) {
+  if (inspector.shouldRemove(node)) {
     VERBOSE && console.log(`To remove: ${path}`)
     if (DRY_RUN) {
       VERBOSE && console.log(`=> Not removing: ${path} [DRY-RUN]`)
@@ -95,12 +95,14 @@ const setRunParams = (argv) => {
 
 const getDir = (argv) => argv._[0] || '.'
 const getDepth = (argv) => argv.d || 2
+const getConfig = (argv) => argv.config || config
 
 const main = async () => {
   const argv = minimist(process.argv.slice(2), { boolean: true })
   setRunParams(argv)
   const dir = getDir(argv)
   const depth = getDepth(argv)
+  const config = getConfig(argv)
 
   if (DRY_RUN) {
     console.log(' ### DRY RUN ONLY ###')
