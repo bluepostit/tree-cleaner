@@ -1,6 +1,7 @@
 const fs = require('fs')
 const minimist = require('minimist')
 const config = require('./config.json')
+const Inspector = require('./inspector')
 
 let DEBUG = false
 let DRY_RUN = false
@@ -17,21 +18,17 @@ const debugDirEntry = (dirEntry) => {
   console.log(`  [${linkPrefix} ${dirEntry.name}${dirSuffix}]`)
 }
 
-const shouldClean = (dirEntry) => {
-  const name = dirEntry.name
-  return config.cleanDirs.indexOf(name) >= 0
-}
-
-const rmdir = (dir) => {
-  fs.rmdir(dir, {
-    recursive: true
-  }, (err) => {
-    if (err) {
-      console.log(`Error removing ${dir}!`)
-      console.log(err)
-    }
-    DEBUG && console.log(`Removed ${dir}`)
-  })
+const removeDirectory = async (dir) => {
+  let success = false
+  try {
+    await fs.promises.rmdir(dir, { recursive: true })
+    success = true
+  } catch (err) {
+    console.log(`Error removing ${dir}!`)
+    console.log(err)
+  }
+  DEBUG && console.log(`Removed ${dir}`)
+  return await success
 }
 
 const getOptionsForRecurse = (options) => {
@@ -41,46 +38,76 @@ const getOptionsForRecurse = (options) => {
   return newOptions
 }
 
-const cleanup = async (path, options) => {
-  DEBUG && console.log(`Checking ${path}/...`)
-  await fs.opendir(path, async (err, dir) => {
-    console.log(dir.path)
-    if (err) {
-      console.log(`Error! Couldn't open directory: ${dir}`)
-      return
-    }
-    for await (const node of dir) {
-      DEBUG && VERBOSE && debugDirEntry(node)
-      const path = `${dir.path}/${node.name}`
-      if (shouldClean(node)) {
-        if (DRY_RUN) {
-          DEBUG && console.log(`=> To remove: ${path}`)
-        } else {
-          rmdir(path)
-        }
-      } else if (node.isDirectory() && options.depth > 1) {
-        const recurseOptions = getOptionsForRecurse(options)
-        cleanup(path, recurseOptions)
+const processDirectoryNode = async (directory, node, options) => {
+  VERBOSE && debugDirEntry(node)
+  const path = `${directory.path}/${node.name}`
+  const inspector = options.inspector
+  let removed = 0
+  if (inspector.shouldRemove(node.name)) {
+    VERBOSE && console.log(`To remove: ${path}`)
+    if (DRY_RUN) {
+      VERBOSE && console.log(`=> Not removing: ${path} [DRY-RUN]`)
+    } else {
+      if (await removeDirectory(path)) {
+        removed++
       }
     }
-  })
+  } else if (node.isDirectory() && options.depth > 1) {
+    removed += await clean(path, getOptionsForRecurse(options))
+  }
+  return removed
 }
+
+const processDirectory = async (directory, options) => {
+  let removed = 0
+  let node = await directory.read()
+  while (node) {
+    removed += await processDirectoryNode(directory, node, options)
+    node = await directory.read()
+  }
+  return await removed
+}
+
+const clean = async (path, options) => {
+  DEBUG && console.log(`Cleaning ${path}/...`)
+  let directory
+
+  if (!options.inspector || !options.inspector.shouldRemove) {
+    throw new Error('Error! No inspector provided')
+  }
+
+  try {
+    directory = await fs.promises.opendir(path)
+  } catch (error) {
+    console.log(`Error! Couldn't open directory: ${directory}`)
+    console.log(error)
+    return
+  }
+
+  return await processDirectory(directory, options)
+}
+
+const setRunParams = (argv) => {
+  DEBUG = argv.debug || false
+  VERBOSE = DEBUG && (argv.verbose || false)
+  DRY_RUN = argv['dry-run'] || false
+}
+
+const getDir = (argv) => argv._[0] || '.'
+const getDepth = (argv) => argv.d || 2
 
 const main = async () => {
   const argv = minimist(process.argv.slice(2), { boolean: true })
-  const dir = argv._[0] || '.'
-  const depth = argv.d || 2
-  DEBUG = argv.debug || false
-  VERBOSE = argv.verbose || false
-  DRY_RUN = argv['dry-run'] || false
+  setRunParams(argv)
+  const dir = getDir(argv)
+  const depth = getDepth(argv)
 
   if (DRY_RUN) {
     console.log(' ### DRY RUN ONLY ###')
   }
-
-  cleanup(dir, {
-    depth
-  })
+  const inspector = new Inspector(config)
+  const removed = await clean(dir, { depth, inspector })
+  console.log(`Removed ${removed} directories`)
 }
 
 main()
