@@ -1,5 +1,4 @@
 const fs = require('fs')
-const os = require('os')
 const path = require('path')
 
 const paths = [
@@ -15,15 +14,15 @@ const paths = [
   'b/subdir/vendor/node_modules/',
   'b/subdir/vendor/node_modules/file',
   // 'c/vendor/batman',
-  'c/vendor/',
+  'c/vendor/'
 ]
 
 // const PATH_ROOT = path.join(os.tmpdir(), 'ftmp-')
-const PATH_ROOT = 'test-test'
+const PATH_ROOT = 'test-'
 
 fs.mkdtemp(PATH_ROOT, (err, directory) => {
   if (err) {
-    console.log("Error creating temp directory!")
+    console.log('Error creating temp directory!')
     console.log(err)
     throw err
   }
