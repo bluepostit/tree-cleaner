@@ -1,5 +1,8 @@
 const fs = require('fs')
 const path = require('path')
+const minimist = require('minimist')
+
+let DEBUG = false
 
 const paths = [
   'a/',
@@ -17,32 +20,49 @@ const paths = [
   'c/vendor/'
 ]
 
-// const PATH_ROOT = path.join(os.tmpdir(), 'ftmp-')
-const PATH_ROOT = 'test-'
+const TEST_DIR_PATH = 'test-jkl980'
 
-fs.mkdtemp(PATH_ROOT, (err, directory) => {
-  if (err) {
+function setRunParams () {
+  const argv = minimist(process.argv.slice(2), { boolean: true })
+  DEBUG = argv.debug || false
+  console.log(`DEBUG: ${DEBUG}`)
+}
+
+const makeDirectories = async () => {
+  console.log(`DEBUG: ${DEBUG}`)
+
+  try {
+    fs.promises.mkdir(TEST_DIR_PATH)
+  } catch (error) {
     console.log('Error creating temp directory!')
-    console.log(err)
-    throw err
+    console.log(error)
+    throw error
   }
-  console.log(`Created temp directory: ${directory}`)
-  paths.forEach(async (node) => {
-    const pathName = path.join(directory, node)
+  console.log(`Created temp directory: ${TEST_DIR_PATH}`)
+
+  for (const node of paths) {
+    const pathName = path.join(TEST_DIR_PATH, node)
     try {
-      console.log(`path: '${pathName}'`)
+      DEBUG && console.log(`path: '${pathName}'`)
       if (node.slice(-1) === '/') {
-        console.log(`creating dir: ${pathName}`)
+        DEBUG && console.log(`creating dir: ${pathName}`)
         await fs.promises.mkdir(pathName, { recursive: true })
-        console.log(`created dir: ${pathName}`)
+        DEBUG && console.log(`created dir: ${pathName}`)
       } else {
-        console.log(`creating file: ${pathName}`)
+        // DEBUG && console.log(`creating file: ${pathName}`)
         await fs.promises.open(pathName, 'w')
-        console.log(`created file: ${pathName}`)
+        // DEBUG && console.log(`created file: ${pathName}`)
       }
     } catch (error) {
       console.log(error)
       console.log(error.stack)
     }
-  })
-})
+  }
+}
+
+function main () {
+  setRunParams()
+  makeDirectories()
+}
+
+main()

@@ -10,7 +10,8 @@
   },
   "scripts": {
     "start": "node index.js",
-    "testdirs": "node test/mkdirs.js"
+    "testdirs": "node test/mkdirs.js",
+    "test:script": "bash test/test.sh"
   },
   "devDependencies": {
     "eslint": "^7.0.0",
