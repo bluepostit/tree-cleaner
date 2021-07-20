@@ -1,3 +1,4 @@
 {
-  "removeNames": ["node_modules", "vendor", "tmp"]
+  "include-names": ["node_modules", "vendor", "tmp"],
+  "exclude-names": [".git"]
 }

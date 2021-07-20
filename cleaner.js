@@ -18,16 +18,27 @@ const debugNode = (node) => {
 }
 
 class Worker {
-  constructor (params = {
-    debug: false,
-    verbose: false,
-    dryRun: false,
-    directories: ['node_modules', 'vendor', 'tmp']
+  constructor ({
+    debug,
+    verbose,
+    dryRun,
+    includes,
+    excludes
   }) {
+    const params = {
+      debug: debug || false,
+      verbose: verbose || false,
+      dryRun: dryRun || false,
+      includes: includes || [],
+      excludes: excludes || []
+    }
     Object.assign(this, params)
 
     if (this.debug) {
       console.log(params)
+    }
+    if (this.dryRun) {
+      console.log('### DRY RUN ONLY ###')
     }
   }
 
@@ -35,11 +46,15 @@ class Worker {
     if (!node.isDirectory()) {
       return false
     }
-    return this.directories.indexOf(node.name) >= 0
+    return this.includes.indexOf(node.name) >= 0
   }
 
   shouldRecurse (node, depth) {
     return node.isDirectory() && depth > 1
+  }
+
+  shouldExclude (node) {
+    return this.excludes.indexOf(node.name) >= 0
   }
 
   async processDirectory (directory, depth) {
@@ -58,8 +73,10 @@ class Worker {
     const path = `${directory.path}/${node.name}`
     let removedCount = 0
 
-    if (this.shouldRemove(node)) {
-      verbose && console.log('Matches remove pattern')
+    if (this.shouldExclude(node)) {
+      verbose && console.log(`${path} matches exclude pattern.`)
+    } else if (this.shouldRemove(node)) {
+      verbose && console.log(`${path} matches remove pattern`)
       if (!this.dryRun) {
         if (await remove(path)) {
           removedCount++
@@ -74,10 +91,6 @@ class Worker {
   }
 
   async clean (path, depth) {
-    if (this.dryRun) {
-      console.log('### DRY RUN ONLY ###')
-    }
-
     this.debug && console.log(`Entering ${path}`)
     this.verbose && console.log(`(depth: ${depth})`)
 
@@ -93,13 +106,20 @@ class Worker {
 }
 
 class Cleaner {
-  constructor (params = {
-    debug: false,
-    verbose: false,
-    dryRun: false,
-    directories: ['node_modules', 'vendor', 'tmp']
+  constructor ({
+    debug,
+    verbose,
+    dryRun,
+    includes,
+    excludes
   }) {
-    this.worker = new Worker(params)
+    this.worker = new Worker({
+      debug,
+      verbose,
+      dryRun,
+      includes,
+      excludes
+    })
   }
 
   clean (path, depth) {
