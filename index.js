@@ -107,6 +107,11 @@ const main = async () => {
   if (DRY_RUN) {
     console.log(' ### DRY RUN ONLY ###')
   }
+
+  if (VERBOSE) {
+    console.log(config)
+  }
+
   const inspector = new Inspector(config)
   const removed = await clean(dir, { depth, inspector })
   console.log(`Removed ${removed} directories`)
