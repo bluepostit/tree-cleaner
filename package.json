@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "cleans up build files for Rails projects",
   "main": "index.js",
-  "author": "Yair Gordon",
+  "author": "https://github.com/bluepostit",
   "license": "MIT",
   "dependencies": {
     "minimist": "^1.2.5"
