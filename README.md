@@ -4,6 +4,9 @@ Recursively deletes directories of dependency libraries of code projects you are
 
 This frees up space on your drive. Please note that you will need to re-install them if you want to run your project later.
 
+## Install
+Clone the project, then run `npm install`.
+
 ## Usage
 
 ### Examples
