@@ -1,8 +1,10 @@
 # Tree Cleaner
 
-Recursively deletes directories of dependency libraries of code projects you are not working on.
+Recursively deletes directories of dependency libraries inside code projects you are not currently working on.
 
-This frees up space on your drive. Please note that you will need to re-install them if you want to run your project later.
+This frees up space on your drive and saves you the tedious task of finding and deleting these directories manually.
+
+Please note that if you want to run the cleaned projects later on, you will first need to re-install their dependency libraries the usual way. For example, for a Node project you would run `npm install` or `yarn install` as appropriate to the particular project's setup.
 
 ## Install
 Clone the project, then run `npm install`.
