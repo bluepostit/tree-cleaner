@@ -4,7 +4,7 @@ const defaultConfig = require('./config.json')
 
 const getRunArgs = () => minimist(process.argv.slice(2), { boolean: true })
 
-const getPath = (args) => args._[0] || '.'
+const getPath = (args) => args._[0]
 const getDepth = (args) => args.d || 2
 
 const getArgArray = (args, name) => {
@@ -37,6 +37,11 @@ const main = async () => {
   const args = getRunArgs()
   const path = getPath(args)
   const depth = getDepth(args)
+
+  if (!path) {
+    console.log('Please provide a path to clean')
+    return
+  }
 
   const cleaner = buildCleaner(args)
   const removed = await cleaner.clean(path, depth)

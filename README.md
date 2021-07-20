@@ -11,9 +11,15 @@ Clone the project, then run `npm install`.
 
 ## Usage
 
+## Default values
+- Unless otherwise specified, a depth of **2** will be used.
+- Unless otherwise specified, any directory within the given depth whose name is `node_modules`, `vendor`, or `tmp`, and which is not the child of an excluded directory, will be deleted.
+- Unless otherwise specified, any directory named `.git`, and all its children, will not be examined or checked.
+- You can specify your own arguments for these parameters, as shown in the examples below.
+
 ### Examples
 
-Go through the `~/code` directory, recursing to a depth of three subdirectories. Delete all directories named `tmp` or `node_modules`, but skip the `.git` directory and all its children:
+Go through the `~/code` directory, recursing to a depth of three subdirectories. Delete all directories named `tmp` or `node_modules`, and exclude the `.git` directory and all its children from any analysis or removal:
 
 ```bash
 npm run start -- -d3 --include-names="tmp node_modules" --exclude-names=".git" ~/code
